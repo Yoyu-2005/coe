@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VECTA | Vector Search Optimization Platform</title>
+  
+  <!-- Modern Clean Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Clean Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-logo">
+        <svg class="brand-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+        <span class="logo-title">VECTA</span>
+      </div>
+      <div class="brand-divider"></div>
+      <span class="brand-subtitle">Vector Search Index Optimizer</span>
+    </div>
+
+    <!-- Live Telemetry Status -->
+    <div class="telemetry-bar" id="telemetryBar">
+      <div class="telemetry-item">
+        <span class="status-indicator"></span>
+        <span class="label">ENGINE:</span>
+        <span class="val highlight" id="telemetryEngine">FAISS AVX2</span>
+      </div>
+      <div class="telemetry-divider"></div>
+      <div class="telemetry-item">
+        <span class="label">CPU CORES:</span>
+        <span class="val" id="telemetryCpu">24 Threads</span>
+      </div>
+      <div class="telemetry-divider"></div>
+      <div class="telemetry-item">
+        <span class="label">FREE MEMORY:</span>
+        <span class="val" id="telemetryRam">8.9 GB</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn btn-primary" id="triggerAutoTuneBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        Run Optimization
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container -->
+  <main class="dashboard-container">
+
+    <!-- Section 1: Workload & SLA Configuration -->
+    <section class="card panel-workload">
+      <div class="card-header">
+        <div>
+          <h3>Workload Profile &amp; SLA Requirements</h3>
+          <p class="section-desc">Define vector characteristics and performance constraints to determine the optimal index architecture.</p>
+        </div>
+        <div class="header-tags">
+          <span class="status-pill active">Continuous Profiling</span>
+        </div>
+      </div>
+
+      <div class="workload-layout">
+        <!-- Sliders & Presets Area -->
+        <div class="workload-controls-col">
+          <!-- Preset Buttons -->
+          <div class="presets-row">
+            <span class="presets-label">Workload Presets:</span>
+            <div class="preset-buttons" id="presetButtons">
+              <button class="preset-btn active" data-preset="rag_semantic_search">RAG Semantic Search</button>
+              <button class="preset-btn" data-preset="recommendation_high_qps">Recommender System</button>
+              <button class="preset-btn" data-preset="edge_memory_constrained">Memory-Constrained Edge</button>
+              <button class="preset-btn" data-preset="sift_benchmark">Image Embeddings (SIFT)</button>
+            </div>
+          </div>
+
+          <!-- Sliders Grid -->
+          <div class="controls-grid">
+            <div class="control-group">
+              <div class="control-label">
+                <span>Vector Count</span>
+                <span class="control-val" id="valVectors">15,000</span>
+              </div>
+              <input type="range" id="sliderVectors" min="5000" max="30000" step="2500" value="15000">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Dimensions</span>
+                <span class="control-val" id="valDim">128</span>
+              </div>
+              <input type="range" id="sliderDim" min="32" max="384" step="32" value="128">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Target Recall SLA</span>
+                <span class="control-val highlight-green" id="valRecall">95.0%</span>
+              </div>
+              <input type="range" id="sliderRecall" min="0.80" max="0.99" step="0.01" value="0.95">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Max Latency SLA</span>
+                <span class="control-val" id="valLatency">1.5 ms</span>
+              </div>
+              <input type="range" id="sliderLatency" min="0.5" max="6.0" step="0.25" value="1.5">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Memory Budget</span>
+                <span class="control-val" id="valMemory">128 MB</span>
+              </div>
+              <input type="range" id="sliderMemory" min="20" max="256" step="10" value="128">
+            </div>
+
+            <div class="control-group">
+              <div class="control-label">
+                <span>Top-K Neighbors</span>
+                <span class="control-val" id="valK">10</span>
+              </div>
+              <input type="range" id="sliderK" min="1" max="50" step="1" value="10">
+            </div>
+          </div>
+        </div>
+
+        <!-- Workload Geometry Profiler Metrics -->
+        <div class="workload-diagnostics-col">
+          <div class="diagnostics-heading">Dataset Profile &amp; Geometry</div>
+          <div class="diagnostics-grid">
+            <div class="diag-card">
+              <span class="d-label">Intrinsic Dimensionality</span>
+              <span class="d-val" id="mIntrinsicDim">51.2</span>
+              <span class="d-sub">Manifold compression: 2.5x</span>
+            </div>
+            <div class="diag-card">
+              <span class="d-label">Clustering Tendency</span>
+              <span class="d-val" id="mHopkins">0.652</span>
+              <span class="d-sub">Hopkins Index score</span>
+            </div>
+            <div class="diag-card">
+              <span class="d-label">Vector Norm Variance</span>
+              <span class="d-val" id="mNormVar">0.082</span>
+              <span class="d-sub">Dense distribution</span>
+            </div>
+            <div class="diag-card">
+              <span class="d-label">Profiling Overhead</span>
+              <span class="d-val highlight" id="mProfTime">3.2 ms</span>
+              <span class="d-sub">Sub-linear sampling</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Pareto Trade-off & Recommended Architecture -->
+    <section class="grid-row row-pareto">
+      
+      <!-- Card: Pareto Frontier Chart -->
+      <div class="card flex-2" id="paretoCard">
+        <div class="card-header">
+          <div>
+            <h3>Performance Trade-off Analysis (Pareto Frontier)</h3>
+            <p class="section-desc">Scatter plot of candidate index configurations across latency vs. recall trade-offs.</p>
+          </div>
+          <div class="header-tags">
+            <span class="tag-pill" id="candidateCountBadge">312 Configurations</span>
+            <span class="tag-pill green" id="paretoCountBadge">50 Pareto Optimal</span>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="paretoChart"></canvas>
+        </div>
+
+        <div class="pareto-legend-strip">
+          <span class="leg-item"><span class="leg-dot gray"></span> Sub-optimal / Exceeds SLA</span>
+          <span class="leg-item"><span class="leg-dot blue"></span> Pareto Optimal Candidate</span>
+          <span class="leg-item"><span class="leg-dot amber"></span> Recommended Configuration</span>
+          <span class="leg-note">X-Axis: Query Latency (p95) | Y-Axis: Recall</span>
+        </div>
+      </div>
+
+      <!-- Card: Selected Recommendation -->
+      <div class="card flex-1" id="recommendationCard">
+        <div class="card-header">
+          <div>
+            <h3>Recommended Index Architecture</h3>
+            <p class="section-desc">Selected configuration meeting all SLA constraints.</p>
+          </div>
+          <span class="tag-pill blue" id="tuningDurationBadge">Tuned in 11.2 ms</span>
+        </div>
+
+        <div class="winner-panel">
+          <div class="winner-title-box">
+            <div class="winner-title" id="winnerConfigTitle">HNSW(M=48, efC=32, efS=128)</div>
+            <div class="winner-subtitle" id="winnerFamilyTag">High-Exploration Graph-based Index</div>
+          </div>
+
+          <div class="winner-metrics-grid">
+            <div class="metric-card">
+              <span class="mc-label">Predicted Recall</span>
+              <span class="mc-val green" id="winnerRecall">94.6%</span>
+              <span class="mc-sub" id="winnerRecallCi">&plusmn; 1.2% CI</span>
+            </div>
+            <div class="metric-card">
+              <span class="mc-label">Query Latency (p95)</span>
+              <span class="mc-val blue" id="winnerLatency">0.22 ms</span>
+              <span class="mc-sub" id="winnerLatencyCi">&plusmn; 0.04 ms CI</span>
+            </div>
+            <div class="metric-card">
+              <span class="mc-label">Memory Footprint</span>
+              <span class="mc-val" id="winnerMemory">13.1 MB</span>
+              <span class="mc-sub">Within memory limit</span>
+            </div>
+            <div class="metric-card">
+              <span class="mc-label">Est. Build Time</span>
+              <span class="mc-val" id="winnerBuildTime">0.08 s</span>
+              <span class="mc-sub">Rapid indexing</span>
+            </div>
+          </div>
+
+          <div class="rationale-box">
+            <div class="rationale-label">Selection Rationale</div>
+            <p id="winnerRationaleText">
+              Selected HNSW(M=48, efC=32, efS=128) achieving predicted 94.6% Recall at 0.22 ms p95 latency.
+              It strictly satisfies the latency constraint and conforms to the configured RAM budget.
+            </p>
+          </div>
+
+          <div class="winner-action-bar">
+            <button class="btn btn-secondary full-width" id="deployWinnerBtn">
+              Deploy to Engine &amp; Run Benchmark
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Empirical Head-to-Head Arena & Query Tester -->
+    <section class="grid-row row-arena">
+      
+      <!-- Card: Head-to-Head Arena -->
+      <div class="card flex-2" id="arenaCard">
+        <div class="card-header">
+          <div>
+            <h3>Empirical Benchmark Arena</h3>
+            <p class="section-desc">Live performance benchmark against default FAISS configurations.</p>
+          </div>
+          <button class="btn btn-sm btn-outline" id="runArenaBtn">
+            Re-run Benchmark
+          </button>
+        </div>
+
+        <div class="arena-verdict-banner" id="arenaVerdictBanner">
+          <span class="verdict-tag">RESULT</span>
+          <span id="verdictText">Vecta Auto-Tuned index achieves +37.6% higher recall than FAISS Default HNSW with 0.22 ms p95 latency!</span>
+        </div>
+
+        <!-- Comparative Metrics Table -->
+        <div class="table-responsive">
+          <table class="arena-table" id="arenaTable">
+            <thead>
+              <tr>
+                <th>Index Architecture</th>
+                <th>Recall@k</th>
+                <th>p95 Latency</th>
+                <th>p99 Latency</th>
+                <th>Throughput (QPS)</th>
+                <th>RAM Footprint</th>
+                <th>Build Time</th>
+              </tr>
+            </thead>
+            <tbody id="arenaTableBody">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Chart comparison -->
+        <div class="arena-chart-wrapper">
+          <canvas id="arenaBarChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Card: Live Vector Query Tester -->
+      <div class="card flex-1" id="playgroundCard">
+        <div class="card-header">
+          <div>
+            <h3>Live Query Tester</h3>
+            <p class="section-desc">Test sample queries against the active index.</p>
+          </div>
+        </div>
+
+        <div class="playground-body">
+          <div class="query-action-strip">
+            <button class="btn btn-primary full-width" id="executeSearchBtn">
+              Execute Test Query
+            </button>
+          </div>
+
+          <!-- Query Telemetry Hud -->
+          <div class="query-telemetry-hud" id="queryTelemetryHud">
+            <div class="q-stat">
+              <span class="qs-label">Query Latency</span>
+              <span class="qs-val green" id="qLatencyVal">0.18 ms</span>
+            </div>
+            <div class="q-stat">
+              <span class="qs-label">Ground Truth Match</span>
+              <span class="qs-val" id="qGtMatchVal">10 / 10 (100%)</span>
+            </div>
+            <div class="q-stat">
+              <span class="qs-label">Total Queries</span>
+              <span class="qs-val" id="qTotalServed">124</span>
+            </div>
+          </div>
+
+          <!-- Neighbor List -->
+          <div class="neighbors-container">
+            <div class="neighbors-header">Retrieved Nearest Neighbors:</div>
+            <div class="neighbors-list" id="neighborsList">
+              <!-- Filled dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Client Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
